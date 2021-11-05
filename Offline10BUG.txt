@@ -1,0 +1,208 @@
+var  Z[9,n], Zt[n], Z.stage[n], Z.albumin[n], Z.ecog[n], Z.ap[n], Z.urea[n], 
+                            Z.extranod[n], Z.bulk[n], Z.marrow[n], Z.bsy[n],
+     mean.Z[9,n], mu[9,n], gamma.0[9], gamma.age[9], gamma.sex[9], tau.Z[9], 
+                      gamma2[1], gamma3[2], gamma4[3], gamma5[4], gamma6[5],
+                      gamma7[6], gamma8[7], gamma9[8], gamma10[9], gamma11[10];
+
+model
+
+
+{for (i in 1:n)
+     {for (j in 1:9)
+          {mu[j,i]<-gamma.0[j]+gamma.age[j]*age[i]+gamma.sex[j]*sex[i]
+           }
+
+      hb[i]~dnorm(mean.Z[1,i],tau.Z[1]) ################### j=1
+      mean.Z[1,i]<-mu[1,i]
+      Z[1,i]<-hb[i]
+
+      logwbc[i]~dnorm(mean.Z[2,i],tau.Z[2]) ####################### j=2
+      mean.Z[2,i]<-mu[2,i]+gamma2[1]*(Z[1,i]-mu[1,i])
+      Z[2,i]<-logwbc[i]
+
+      stage[i]~dinterval(Z.stage[i],cut.stage[1:3]) ################### j=3
+      Z.stage[i] ~ dnorm(mean.Z[3,i], tau.Z[3])
+      mean.Z[3,i]<-mu[3,i]+gamma3[1]*(Z[1,i]-mu[1,i])+
+                           gamma3[2]*(Z[2,i]-mu[2,i])
+      Z[3,i]<-Z.stage[i]
+
+      albumin[i]~dinterval(Z.albumin[i],0) ######################### j=4
+      Z.albumin[i]~dnorm(mean.Z[4,i],1)
+      mean.Z[4,i]<-mu[4,i]+gamma4[1]*(Z[1,i]-mu[1,i])+
+                           gamma4[2]*(Z[2,i]-mu[2,i])+
+                           gamma4[3]*(Z[3,i]-mu[3,i])
+      Z[4,i]<-Z.albumin[i]
+
+      ldh.cen[i]~dinterval(ldh[i],c(0,1))    
+       #### 0 for low,  1 for normal (censored), 2 for high.
+      ldh[i]~dnorm(mean.Z[5,i],tau.Z[5])  ######################## j=5
+      mean.Z[5,i]<-mu[5,i]+gamma5[1]*(Z[1,i]-mu[1,i])+
+                           gamma5[2]*(Z[2,i]-mu[2,i])+
+                           gamma5[3]*(Z[3,i]-mu[3,i])+
+                           gamma5[4]*(Z[4,i]-mu[4,i])
+      Z[5,i]<-ldh[i]
+
+      ecog[i]~dinterval(Z.ecog[i],cut.ecog[1:4])  ################ j=6
+      Z.ecog[i]~dnorm(mean.Z[6,i],tau.Z[6])
+      mean.Z[6,i]<-mu[6,i]+gamma6[1]*(Z[1,i]-mu[1,i])+
+                           gamma6[2]*(Z[2,i]-mu[2,i])+
+                           gamma6[3]*(Z[3,i]-mu[3,i])+
+                           gamma6[4]*(Z[4,i]-mu[4,i])+
+                           gamma6[5]*(Z[5,i]-mu[5,i])
+      Z[6,i]<-Z.ecog[i]
+
+      ap[i]~dinterval(Z.ap[i],0) ################# j=7
+      Z.ap[i]~dnorm(mean.Z[7,i],1)
+      mean.Z[7,i]<-mu[7,i]+gamma7[1]*(Z[1,i]-mu[1,i])+
+                           gamma7[2]*(Z[2,i]-mu[2,i])+
+                           gamma7[3]*(Z[3,i]-mu[3,i])+
+                           gamma7[4]*(Z[4,i]-mu[4,i])+
+                           gamma7[5]*(Z[5,i]-mu[5,i])+
+                           gamma7[6]*(Z[6,i]-mu[6,i])
+      Z[7,i]<-Z.ap[i]
+
+      urea[i]~dinterval(Z.urea[i],0) ################ j=8
+      Z.urea[i]~dnorm(mean.Z[8,i],1)
+      mean.Z[8,i]<-mu[8,i]+gamma8[1]*(Z[1,i]-mu[1,i])+
+                           gamma8[2]*(Z[2,i]-mu[2,i])+
+                           gamma8[3]*(Z[3,i]-mu[3,i])+
+                           gamma8[4]*(Z[4,i]-mu[4,i])+
+                           gamma8[5]*(Z[5,i]-mu[5,i])+
+                           gamma8[6]*(Z[6,i]-mu[6,i])+
+                           gamma8[7]*(Z[7,i]-mu[7,i])
+      Z[8,i]<-Z.urea[i]   
+
+      is.censored[i]~dinterval(t[i],t.cen[i])
+      t[i]~dweib(alpha,lambda[i]) ##################### j=9
+      log(lambda[i]) <- alpha*mean.Z[9,i]     
+      mean.Z[9,i]<-mu[9,i]+gamma9[1]*(Z[1,i]-mu[1,i])+
+                           gamma9[2]*(Z[2,i]-mu[2,i])+
+                           gamma9[3]*(Z[3,i]-mu[3,i])+
+                           gamma9[4]*(Z[4,i]-mu[4,i])+
+                           gamma9[5]*(Z[5,i]-mu[5,i])+
+                           gamma9[6]*(Z[6,i]-mu[6,i])+
+                           gamma9[7]*(Z[7,i]-mu[7,i])+
+                           gamma9[8]*(Z[8,i]-mu[8,i])
+                            
+
+
+
+      }
+
+
+
+#################PRIORS
+
+######### alpha
+ alpha ~ dgamma(4, 4)                           #prior mean 1, prior sd 0.5
+ 
+
+######### hb (j=1)
+ gamma.0[1]~dnorm(100.0,0.0001)                 #prior mean 100, prior sd 100
+ gamma.age[1]~dnorm(0.0,0.01)                   #prior mean 0.0, prior sd 10
+ gamma.sex[1]~dnorm(0.0,0.001)                  #prior mean 0.0, prior sd 31.6
+ tau.Z[1]~dgamma(1.44,200)                      #prior mean 0.0072, prior sd 0.006
+
+######### wbc (j=2)
+ gamma.0[2]~dnorm(2.0,0.25)                     #prior mean 2.0,  prior sd 2.0
+ gamma.age[2]~dnorm(0.0,1)                      #prior mean 0.0,  prior sd 1.0
+ gamma.sex[2]~dnorm(0.0,0.1)                    #prior mean 0.0,  prior sd 3.16
+ gamma2[1]~dnorm(0.0,1)                         #prior mean 0.0,  prior sd 1.0
+ tau.Z[2]~dgamma(1.44,0.2)                      #prior mean 7.2,  prior sd 6.0
+
+######### stage (j=3)
+ gamma.0[3]~dnorm(0.0,1.0)                      #prior mean 0.0,  prior sd 1.0
+ gamma.age[3]~dnorm(0.0,1.0)                    #prior mean 0.0,  prior sd 1.0
+ gamma.sex[3]~dnorm(0.0,0.1)                    #prior mean 0.0,  prior sd 3.16
+ gamma3[1]~dnorm(0.0,0.01)                      #prior mean 0.0,  prior sd 10
+ gamma3[2]~dnorm(0.0,0.01)                      #prior mean 0.0,  prior sd 10
+ tau.Z[3]~dgamma(2,1)                           #prior mean 2.1,  prior sd 1.41
+ cut.stage[1]<-0
+ cut.stage[2]<-cc
+ cut.stage[3]<-1
+ cc~dbeta(1.1,1.1)                              #prior mean 0.5,  prior sd 0.28
+
+######### albumin (j=4)
+ gamma.0[4]~dnorm(0.0,0.2)                      #prior mean 0.0,  prior sd 2.24
+ gamma.age[4]~dnorm(0,1)                        #prior mean 0.0,  prior sd 1.0
+ gamma.sex[4]~dnorm(0,0.1)                      #prior mean 0.0,  prior sd 3.16
+ gamma4[1]~dnorm(0,1)                           #prior mean 0.0,  prior sd 1.0
+ gamma4[2]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma4[3]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ tau.Z[4]<-1
+
+######### ldh (j=5)
+
+ gamma.0[5]~dnorm(0.5,0.0001)                   #prior mean 0.5,  prior sd 100
+ gamma.age[5]~dnorm(0.0,0.01)                   #prior mean 0.0,  prior sd 10
+ gamma.sex[5]~dnorm(0.0,0.001)                  #prior mean 0.0,  prior sd 31.6
+ gamma5[1]~dnorm(0,1)                           #prior mean 0.0,  prior sd 1.0
+ gamma5[2]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma5[3]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma5[4]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ tau.Z[5]~dgamma(1.44,3)                        #prior mean 0.48, prior sd 0.4
+
+######### ecog (j=6)
+
+ gamma.0[6]~dnorm(0.5,0.0001)                   #prior mean 0.5,  prior sd 100
+ gamma.age[6]~dnorm(0.0,0.01)                   #prior mean 0.0,  prior sd 10
+ gamma.sex[6]~dnorm(0.0,0.001)                  #prior mean 0.0,  prior sd 31.6
+ gamma6[1]~dnorm(0,1)                           #prior mean 0.0,  prior sd 1.0
+ gamma6[2]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma6[3]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma6[4]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma6[5]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ tau.Z[6]~dgamma(1.44,0.12)                     #prior mean 12.0, prior sd 10
+ cut.ecog[1]<-0
+ cut.ecog[2]<-cd[1]                             #prior mean 0.33,  prior sd 0.236
+ cut.ecog[3]<-cd[1]+cd[2]                       #prior mean 0.67,  prior sd 0.236
+ cut.ecog[4]<-1
+ cd[1:3]~ddirch(acd[1:3])
+ acd[1]<-1
+ acd[2]<-1
+ acd[3]<-1
+
+######### ap (j=7)
+
+ gamma.0[7]~dnorm(0.5,0.0001)                   #prior mean 0.5,  prior sd 100
+ gamma.age[7]~dnorm(0.0,0.01)                   #prior mean 0.0,  prior sd 10
+ gamma.sex[7]~dnorm(0.0,0.001)                  #prior mean 0.0,  prior sd 31.6
+ gamma7[1]~dnorm(0,1)                           #prior mean 0.0,  prior sd 1.0
+ gamma7[2]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma7[3]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma7[4]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma7[5]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma7[6]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ tau.Z[7]<-1
+
+######### urea (j=8)
+
+ gamma.0[8]~dnorm(0.5,0.0001)                   #prior mean 0.5,  prior sd 100
+ gamma.age[8]~dnorm(0.0,0.01)                   #prior mean 0.0,  prior sd 10
+ gamma.sex[8]~dnorm(0.0,0.001)                  #prior mean 0.0,  prior sd 31.6
+ gamma8[1]~dnorm(0,1)                           #prior mean 0.0,  prior sd 1.0
+ gamma8[2]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma8[3]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma8[4]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma8[5]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma8[6]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma8[7]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ tau.Z[8]<-1
+
+
+######### t (j=9)
+ gamma.0[9] ~ dnorm(-7, 0.04)                   #prior mean -7.0,  prior sd 5.0
+ gamma.age[9]~dnorm(0.0,10)                     #prior mean  0.0,  prior sd 0.316
+ gamma.sex[9]~dnorm(0,0.5)                      #prior mean  0.0,  prior sd 1.41
+ gamma9[1]~dnorm(0.0,1)                         #prior mean  0.0,  prior sd 1.0
+ gamma9[2]~dnorm(0.0,0.3)                       #prior mean  0.0,  prior sd 1.83
+ gamma9[3]~dnorm(0.0,0.0025)                    #prior mean  0.0,  prior sd 20
+ gamma9[4]~dnorm(1,0.04)                        #prior mean  1.0,  prior sd 5.0
+ gamma9[5]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10      
+ gamma9[6]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma9[7]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ gamma9[8]~dnorm(0,0.01)                        #prior mean 0.0,  prior sd 10
+ tau.Z[9]<-1
+
+ }
+
