@@ -1,0 +1,32 @@
+#stage has class labels 0,1,2,3
+#ecog has class labels 0,1,2,3,4
+#each binary variable has class labels 0,1
+adjbynoncon<-function(y,E0,V0,var,cuts,nstep=100)
+{#var is the index within the nonnormal variables
+ #E0 and V0 refer just to the nonnormal variables
+ mj<-E0[var]
+ vj<-V0[var,var]
+ sj<-sqrt(vj)
+ Mzb<-E0[-var]
+ Vzb<-V0[-var,-var]
+ C<-V0[-var,var]
+ cutst<-pnorm(cuts,mj,sj)
+ cutst<-c(0,cutst,1)
+ u<-cutst[y+1]+seq(1,2*nstep-1,2)*(cutst[y+2]-cutst[y+1])/(2*nstep)
+ qu<-qnorm(u,mj,sj)
+ m1j<-sum(qu)/nstep
+ v1j<-sum(qu^2)/nstep - m1j^2
+ M1zb<-Mzb+C*(m1j-mj)/vj
+ V1zb<-Vzb-C%*%t(C)*(vj-v1j)/(vj^2)
+ C1<-C*v1j/vj
+ M1<-E0
+ M1[var]<-m1j
+ M1[-var]<-M1zb
+ V1<-V0
+ V1[var,var]<-v1j
+ V1[-var,-var]<-V1zb
+ V1[-var,var]<-C1
+ V1[var,-var]<-t(C1)
+ P1<-solve(V1)
+ return(list(E=M1,P=P1))
+ }
