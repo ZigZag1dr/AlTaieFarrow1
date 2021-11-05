@@ -1,0 +1,62 @@
+BLKindex<-function(patdata,V0,P0,mu0,musex,muage,cuts)    
+{E0<-mu0+muage*patdata$age+musex*patdata$sex
+ E0hb<-E0[1]
+ E0wbc<-E0[2]
+ E0z<-E0[3:5]
+ n<-3
+ J<-3
+ E1<-matrix(nrow=n,ncol=J)
+ P1<-numeric(n*n*J)
+ dim(P1)<-c(n,n,J)
+
+####################### covariates (hb and wbc)
+                                                                 
+ if ((is.na(patdata$hb)==TRUE) & (is.na(patdata$wbc)==TRUE))
+    {P1[,,1]<-P0
+    E1[,1]<-E0[3:5]
+     }
+ else
+    {adjust1<-adjbynorm(patdata$hb,patdata$wbc,E0,V0)
+     P1[,,1]<-adjust1$P
+     E1[,1]<-adjust1$E
+     }
+
+
+###################### covariate (stage)
+                                                              
+ if (is.na(patdata$stage)==TRUE)
+    {P1[,,2]<-P0
+     E1[,2]<-E0[3:5]
+     }
+ else
+    {adjust3<-adjbynoncon(patdata$stage,E0,V0,3,cuts)
+     P1[,,2]<-adjust3$P
+     E1[,2]<-adjust3$E
+     }
+
+
+###################### covariate (albumin)
+                                                            
+ if (is.na(patdata$albumin)==TRUE)
+    {P1[,,3]<-P0
+     E1[,3]<-E0[3:5]
+     }
+ else
+    {adjust4<-adjbynoncon(patdata$albumin,E0,V0,4,0)
+     P1[,,3]<-adjust4$P
+     E1[,3]<-adjust4$E
+     }
+
+
+ E0<-E0[3:5]
+ PP<-matrix(0,nrow=3,ncol=3)
+ PPEE<-rep(0,3)
+ for (j in 1:3)
+     {PP<-PP+P1[,,j]
+      PPEE<-PPEE+P1[,,j]%*%E1[,j]
+      }
+ PP<-PP-2*P0
+ PPEE<-PPEE-2*P0%*%E0
+ EE<-solve(PP,PPEE)
+ return(EE[3])
+ }
