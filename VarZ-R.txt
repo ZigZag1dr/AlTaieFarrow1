@@ -1,0 +1,33 @@
+Var10<-matrix(0,nrow=9,ncol=9)
+Vari<-Var10
+gammai<-Var10
+n.sample<-length(samples10[,1])
+k1<-c(0,34,35,37,40,44,49,55,62)
+k2<-c(0,34,36,39,43,48,54,61,69)
+tau.Z<-samples10[,70:78]
+for(i in 1:n.sample)
+   {gammai[2,1]<-samples10[i,k1[2]]
+    for (j in 3:9)
+        {gammai[j,1:(j-1)]<-samples10[i,k1[j]:k2[j]]
+         }
+    Vari[1,1]<-1/tau.Z[i,1] 
+    Vari[2,1]<-gammai[2,1]*Vari[1,1]
+    Vari[1,2]<-Vari[2,1]
+    Vari[2,2]<-(gammai[2,1]^2)*Vari[1,1]+1/tau.Z[i,2]
+    for (j in 3:9)
+        {gammaij<-gammai[j,1:(j-1)]
+         Vari[j,j]<-Vari[j,1:(j-1)]%*%gammaij+1/tau.Z[i,j]
+         Vari[j,1:(j-1)]<-gammaij%*%Vari[1:(j-1),1:(j-1)]
+         Vari[1:(j-1),j]<-Vari[j,1:(j-1)]
+         }
+     Var10<-Var10+Vari
+     }
+Var10<-Var10/n.sample
+MargVar10<-diag(Var10)
+Corr10<-Var10
+for (i in 1:9)
+    {for (j in 1:9)
+         {Corr10[i,j]<-Var10[i,j]/sqrt(MargVar10[i]*MargVar10[j])
+          }
+     }
+
