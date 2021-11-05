@@ -1,0 +1,133 @@
+model
+
+{for (i in 1:n)
+     {is.censored[i]~dinterval(t[i],t.cen[i])
+      t[i]~dweib(alpha,lambda[i])
+      log(lambda[i]) <- alpha*mean.Z.t[i]   
+      mu.t[i]<-gamma.t.0+gamma.t.age*age[i]+gamma.t.sex*sex[i] 
+      mean.Z.t[i]<- mu.t[i]+gamma.t.hb*(Z.hb[i]-mu.hb[i])+
+                            gamma.t.wbc*(Z.wbc[i]-mu.wbc[i])+
+                            gamma.t.stage*(Z.stage[i]-mu.stage[i])+
+                            gamma.t.albumin*(Z.albumin[i]-mu.albumin[i])
+                            
+
+      hb[i]~dnorm(mu.hb[i],tau.Z.hb)
+      Z.hb[i]<-hb[i]
+      mu.hb[i]<-gamma.hb.0+gamma.hb.age*age[i]+gamma.hb.sex*sex[i]
+
+      logwbc[i]~dnorm(mean.Z.wbc[i],tau.Z.wbc)
+      Z.wbc[i]<-logwbc[i]
+      mu.wbc[i]<-gamma.wbc.0+gamma.wbc.age*age[i]+gamma.wbc.sex*sex[i]
+      mean.Z.wbc[i]<-mu.wbc[i]+gamma.wbc.hb*(Z.hb[i]-mu.hb[i])
+
+      stage[i]~dinterval(Z.stage[i],cut.stage[1:3])
+      Z.stage[i] ~ dnorm(mean.Z.stage[i], tau.Z.stage)
+      mu.stage[i]<-gamma.stage.0+gamma.stage.age*age[i]+
+                                 gamma.stage.sex*sex[i]
+      mean.Z.stage[i]<-mu.stage[i]+gamma.stage.hb*(Z.hb[i]-mu.hb[i])+
+                                   gamma.stage.wbc*(Z.wbc[i]-mu.wbc[i])
+
+      albumin[i]~dinterval(Z.albumin[i],0)
+      Z.albumin[i]~dnorm(mean.Z.albumin[i],1)
+      mu.albumin[i]<-gamma.albumin.0+gamma.albumin.age*age[i]+
+                                     gamma.albumin.sex*sex[i]
+      mean.Z.albumin[i]<-mu.albumin[i]+gamma.albumin.hb*(Z.hb[i]-mu.hb[i])+
+                                       gamma.albumin.wbc*(Z.wbc[i]-mu.wbc[i])+
+                                       gamma.albumin.stage*(Z.stage[i]-mu.stage[i])
+      }
+
+
+
+#################PRIORS
+
+######### alpha
+ alpha ~ dgamma(4, 4)
+ 
+######### t
+ gamma.t.0 ~ dnorm(-7, 0.04)
+ gamma.t.sex~dnorm(0,0.5)
+ gamma.t.age~dnorm(0.0,10)
+ gamma.t.wbc~dnorm(0.0,0.3)
+ gamma.t.albumin~dnorm(1,0.1)
+ gamma.t.stage~dnorm(0.0,0.1)
+ gamma.t.hb~dnorm(0.0,1)
+
+######### hb
+ gamma.hb.0~dnorm(100.0,0.0001)
+ gamma.hb.age~dnorm(0.0,0.01)
+ gamma.hb.sex~dnorm(0.0,0.001)
+ tau.Z.hb~dgamma(2,300)
+
+######### wbc
+ gamma.wbc.0~dnorm(2.0,1)
+ gamma.wbc.age~dnorm(0.0,1)
+ gamma.wbc.sex~dnorm(0.0,0.1)
+ gamma.wbc.hb~dnorm(0.0,4)
+ tau.Z.wbc~dgamma(2,0.3)
+
+######### stage
+ gamma.stage.0~dnorm(0.0,1.0)
+ gamma.stage.age~dnorm(0.0,1.0)
+ gamma.stage.sex~dnorm(0.0,0.1)
+ gamma.stage.hb~dnorm(0.0,0.01)
+ gamma.stage.wbc~dnorm(0.0,0.01)
+ tau.Z.stage~dgamma(2,1)
+ cut.stage[1]<-0
+ cut.stage[2]<-cc
+ cut.stage[3]<-1
+ cc~dbeta(1.1,1.1)
+
+######### albumin
+ gamma.albumin.0~dnorm(0.0,0.2)
+ gamma.albumin.age~dnorm(0,1)
+ gamma.albumin.sex~dnorm(0,0.1)
+ gamma.albumin.wbc~dnorm(0,0.01)
+ gamma.albumin.stage~dnorm(0,0.01)
+ gamma.albumin.hb~dnorm(0,4)
+
+########## variance matrix
+VZ.hb<-1/tau.Z.hb
+
+VZ.wbc<-(gamma.wbc.hb^2)*VZ.hb + 1/tau.Z.wbc
+CZ.wbc.hb<-gamma.wbc.hb*VZ.hb
+
+VZ.stage<-  (gamma.stage.hb^2)*VZ.hb +
+           (gamma.stage.wbc^2)*VZ.wbc+
+           2*gamma.stage.hb*gamma.stage.wbc*CZ.wbc.hb + 1/tau.Z.stage
+CZ.stage.hb<- gamma.stage.hb*VZ.hb      +gamma.stage.wbc*CZ.wbc.hb
+CZ.stage.wbc<-gamma.stage.hb*CZ.wbc.hb + gamma.stage.wbc*VZ.wbc
+
+VZ.albumin<-(gamma.albumin.hb^2)*VZ.hb + 
+            (gamma.albumin.wbc^2)*VZ.wbc + 
+            (gamma.albumin.stage^2)*VZ.stage + 
+          2*(gamma.albumin.hb*gamma.albumin.wbc*CZ.wbc.hb + 
+             gamma.albumin.hb*gamma.albumin.stage*CZ.stage.hb +
+             gamma.albumin.stage*gamma.albumin.wbc*CZ.stage.wbc) + 1
+CZ.albumin.hb<-   gamma.albumin.hb*VZ.hb +      
+                  gamma.albumin.wbc*CZ.wbc.hb +    
+                  gamma.albumin.stage*CZ.stage.hb
+CZ.albumin.wbc<-  gamma.albumin.hb*CZ.wbc.hb +   
+                  gamma.albumin.wbc*VZ.wbc +       
+                  gamma.albumin.stage*CZ.stage.wbc
+CZ.albumin.stage<-gamma.albumin.hb*CZ.stage.hb + 
+                  gamma.albumin.wbc*CZ.stage.wbc + 
+                  gamma.albumin.stage*VZ.stage
+
+VZ.t<-(gamma.t.hb^2)*VZ.hb + (gamma.t.wbc^2)*VZ.wbc + 
+      (gamma.t.stage^2)*VZ.stage + (gamma.t.albumin^2)*VZ.albumin + 
+      2*(gamma.t.hb*gamma.t.wbc*CZ.wbc.hb + 
+         gamma.t.hb*gamma.t.stage*CZ.stage.hb + 
+         gamma.t.stage*gamma.t.wbc*CZ.stage.wbc +
+         gamma.t.albumin*gamma.t.hb*CZ.albumin.hb + 
+         gamma.t.albumin*gamma.t.wbc*CZ.albumin.wbc +
+         gamma.t.albumin*gamma.t.stage*CZ.albumin.stage) + 1
+CZ.t.hb<-     gamma.t.hb*VZ.hb           + gamma.t.wbc*CZ.wbc.hb      + 
+              gamma.t.stage*CZ.stage.hb  + gamma.t.albumin*CZ.albumin.hb
+CZ.t.wbc<-    gamma.t.hb*CZ.wbc.hb       + gamma.t.wbc*VZ.wbc         + 
+              gamma.t.stage*CZ.stage.wbc + gamma.t.albumin*CZ.albumin.wbc
+CZ.t.stage<-  gamma.t.hb*CZ.stage.hb     + gamma.t.wbc*CZ.stage.wbc   + 
+              gamma.t.stage*VZ.stage     + gamma.t.albumin*CZ.albumin.stage
+CZ.t.albumin<-gamma.t.hb*CZ.albumin.hb   + gamma.t.wbc*CZ.albumin.wbc + 
+              gamma.t.stage*CZ.albumin.stage + gamma.t.albumin*VZ.albumin
+ }
+
