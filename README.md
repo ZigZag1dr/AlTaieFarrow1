@@ -26,3 +26,7 @@ indexBLK-R.txt
 BLKindex-R.txt
 
      R function to compute the prognostic index value for an individual patient (6-covariate example)
+
+adjbynorm-R.txt
+
+     R function to compute the update given the normally distributed covariates
