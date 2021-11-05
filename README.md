@@ -13,7 +13,8 @@ Offline10BUG.txt
 
 VarZ-R.txt
 
-      R code to compute the posterior mean of the variance of the latent variables Z from the MCMC samples
+      R code to compute the posterior mean of the variance of the latent variables Z from the MCMC 
+      samples
 
 indexBLK-R.txt
 
@@ -30,3 +31,8 @@ BLKindex-R.txt
 adjbynorm-R.txt
 
      R function to compute the update given the normally distributed covariates
+
+adjbynormnew-R.txt
+
+     More general version of the R function to compute the update given the normally distributed 
+     covariates
