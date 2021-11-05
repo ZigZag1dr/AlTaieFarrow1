@@ -18,6 +18,10 @@ VarZ-R.txt
 indexBLK-R.txt
 
      R function to compute prognostic index values for patients in the data set (6-covariate example)
+     The function was called using the following command.
+
+      indexvaluesBLK<-indexBLK(NHLdata,V0,mu0,musex,muage,cuts)
+
 
 BLKindex-R.txt
 
