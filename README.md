@@ -6,3 +6,7 @@ The repository contains the following files.
 Offline6BUG.txt
 
       JAGS model specifications for offline learning: Six-covariate example
+
+Offline10BUG.txt
+
+      JAGS model specifications for offline learning: Ten-covariate example
