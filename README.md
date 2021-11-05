@@ -4,4 +4,5 @@ Code associated with "Bayes linear Bayes networks with an application to prognos
 The repository contains the following files.
 
 Offline6BUG.txt
-JAGS model specifications for offline learning: Six-covariate example
+
+      JAGS model specifications for offline learning: Six-covariate example
