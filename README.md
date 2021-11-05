@@ -36,3 +36,13 @@ adjbynormnew-R.txt
 
      More general version of the R function to compute the update given the normally distributed 
      covariates
+
+adjbynoncon-R.txt
+
+      R function to compute the update given a binary or ordinal covariate.
+      Note that binary and ordinal variables were coded with the first category labelled 0. 
+      The binary variables had class labels 0, 1. Stage has class labels 0, 1, 2, 3 and ECOG has 
+      class labels 0, 1, 2, 3, 4. 
+      So the function adds 1 to the values for the index of the cut-points. In the case of an 
+      interval-censored value of LDH, the class labels 
+      are 0, 1, 2 but the observed class is always 1.
