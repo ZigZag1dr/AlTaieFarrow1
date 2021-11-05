@@ -1,0 +1,10 @@
+indexBLK<-function(data,V0,mu0,musex,muage,cuts)
+{indexvalues<-numeric(1391)
+ for (i in 1:1391)
+     {patdata<-list(age=data$age[i],sex=data$sex[i],hb=data$hb[i],
+                    wbc=data$logwbc[i],stage=data$stage[i],albumin=data$albumin[i])
+      P0<-solve(V0[3:5,3:5])      
+      indexvalues[i]<-BLKindex(patdata,V0,P0,mu0,musex,muage,cuts)
+      }
+ return(indexvalues)
+ }
