@@ -10,3 +10,7 @@ Offline6BUG.txt
 Offline10BUG.txt
 
       JAGS model specifications for offline learning: Ten-covariate example
+
+VarZ-R.txt
+
+      R code to compute the posterior mean of the variance of the latent variables Z from the MCMC samples
