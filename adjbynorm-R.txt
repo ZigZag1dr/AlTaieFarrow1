@@ -1,0 +1,29 @@
+adjbynorm<-function(y1,y2,E0,V0)
+{# observed variables (hb, wbc)
+ V01<-V0[2:5,2:5]
+ E01<-E0[2:5]
+ if (!is.na(y1))
+    {C01<-V0[2:5,1]
+     V02<-V01-C01%*%t(C01)/V0[1,1]
+     E02<-E01+C01*(y1-E0[1])/V0[1,1]
+     }
+ else
+     {V02<-V01
+      E02<-E01
+      }
+ V03<-V02[2:4,2:4]
+ E03<-E02[2:4]
+ if (!is.na(y2))
+    {C02<-V02[2:4,1]
+     V0y<-V02[1,1]
+     E0y<-E02[1]
+     V1<-V03-C02%*%t(C02)/V0y
+     E1<-E03+C02*(y2-E0y)/V0y
+     }
+ else
+     {V1<-V03
+      E1<-E03
+      }
+ P1<-solve(V1)
+ return(list(E=E1,P=P1))
+}
