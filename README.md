@@ -14,3 +14,7 @@ Offline10BUG.txt
 VarZ-R.txt
 
       R code to compute the posterior mean of the variance of the latent variables Z from the MCMC samples
+
+indexBLK-R.txt
+
+     R function to compute prognostic index values for patients in the data set (6-covariate example)
