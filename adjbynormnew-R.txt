@@ -1,0 +1,28 @@
+adjbynormnew<-function(y,E0,V0,normlist)
+{# y is a vector with length equal to the number of non-permanent covariates.
+ # Values which are missing are entered as NA.
+ # normlist is a vector giving the indices of the normally distributed variables.
+ n<-length(y)
+ index<-1:(n+1)
+ nonnorm<-index[-normlist]
+ V01<-V0[nonnorm,nonnorm]
+ E01<-E0[nonnorm]
+ ynorm<-y[normlist]
+ ynormobs<-ynorm[is.na(ynorm)==FALSE]
+ normobs<-normlist[is.na(ynorm)==FALSE]
+ if (length(normobs)>0)
+    {V0obs<-V0[normobs,normobs]
+     E0obs<-E0[normobs]
+     C0<-V0[nonnorm,normobs]
+     C0t<-t(C0)
+     D<-t(solve(V0obs,C0t))
+     V1<-V01-D%*%C0t
+     E1<-E01+D%*%(ynormobs-E0obs)
+     }
+ else
+    {E1<-E01
+     V1<-V01
+     }
+ P1<-solve(V1)
+ return(list(E=E1,P=P1))
+}
