@@ -46,3 +46,7 @@ adjbynoncon-R.txt
       So the function adds 1 to the values for the index of the cut-points. In the case of an 
       interval-censored value of LDH, the class labels 
       are 0, 1, 2 but the observed class is always 1.
+
+indexBLK10-R.txt
+
+      R Function to compute prognostic index values for patients in the data set (10-covariate example)
