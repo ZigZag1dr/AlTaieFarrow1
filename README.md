@@ -50,3 +50,7 @@ adjbynoncon-R.txt
 indexBLK10-R.txt
 
       R Function to compute prognostic index values for patients in the data set (10-covariate example)
+      
+BLKindex10-R.txt
+
+      R function to compute the prognostic index value for an individual patient (10-covariate example)
