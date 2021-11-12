@@ -1,0 +1,84 @@
+model
+
+{for (i in 1:n)
+     {mu.t[i]<-gamma.t.0+gamma.t.age*age[i]+gamma.t.sex*sex[i]  
+      mean.Z.t[i]<- mu.t[i]+gamma.t.hb*(Z.hb[i]-mu.hb[i])+
+                            gamma.t.wbc*(Z.wbc[i]-mu.wbc[i])+
+                            gamma.t.stage*(Z.stage[i]-mu.stage[i])+
+                            gamma.t.albumin*(Z.albumin[i]-mu.albumin[i])
+                            
+
+      hb[i]~dnorm(mu.hb[i],tau.Z.hb)
+      Z.hb[i]<-hb[i]
+      mu.hb[i]<-gamma.hb.0+gamma.hb.age*age[i]+gamma.hb.sex*sex[i]
+
+      logwbc[i]~dnorm(mean.Z.wbc[i],tau.Z.wbc)
+      Z.wbc[i]<-logwbc[i]
+      mu.wbc[i]<-gamma.wbc.0+gamma.wbc.age*age[i]+gamma.wbc.sex*sex[i]
+      mean.Z.wbc[i]<-mu.wbc[i]+gamma.wbc.hb*(Z.hb[i]-mu.hb[i])
+
+      stage[i]~dinterval(Z.stage[i],cut.stage[1:3])
+      Z.stage[i] ~ dnorm(mean.Z.stage[i], tau.Z.stage)
+      mu.stage[i]<-gamma.stage.0+gamma.stage.age*age[i]+
+                                 gamma.stage.sex*sex[i]
+      mean.Z.stage[i]<-mu.stage[i]+gamma.stage.hb*(Z.hb[i]-mu.hb[i])+
+                                   gamma.stage.wbc*(Z.wbc[i]-mu.wbc[i])
+
+      albumin[i]~dinterval(Z.albumin[i],0)
+      Z.albumin[i]~dnorm(mean.Z.albumin[i],1)
+      mu.albumin[i]<-gamma.albumin.0+gamma.albumin.age*age[i]+
+                                     gamma.albumin.sex*sex[i]
+      mean.Z.albumin[i]<-mu.albumin[i]+gamma.albumin.hb*(Z.hb[i]-mu.hb[i])+
+                                       gamma.albumin.wbc*(Z.wbc[i]-mu.wbc[i])+
+                                       gamma.albumin.stage*(Z.stage[i]-mu.stage[i])
+      }
+
+
+
+
+#################PARAMETERS
+
+######### t
+ gamma.t.0       <- -7.879e+00
+ gamma.t.sex     <- -1.106e-01
+ gamma.t.age     <-  4.562e-02
+ gamma.t.wbc     <-  2.055e-01
+ gamma.t.albumin <-  2.535e-01
+ gamma.t.stage   <-  6.350e-01
+ gamma.t.hb      <- -1.237e-02
+
+
+######### hb
+ gamma.hb.0      <-  1.266e+02
+ gamma.hb.age    <- -1.773e-01
+ gamma.hb.sex    <- -4.902e+00
+ tau.Z.hb        <-  3.090e-03
+
+######### wbc
+ gamma.wbc.0     <-  1.998e+00
+ gamma.wbc.age   <-  9.662e-04
+ gamma.wbc.sex   <- -4.239e-03
+ gamma.wbc.hb    <-  6.685e-04
+ tau.Z.wbc       <-  5.860e+00
+
+######### stage
+ gamma.stage.0   <-  6.020e-01
+ gamma.stage.age <-  6.000e-03
+ gamma.stage.sex <-  2.544e-02
+ gamma.stage.hb  <- -1.065e-02
+ gamma.stage.wbc <- -3.131e-02
+ tau.Z.stage     <-  2.386e+00
+ cut.stage[1]    <-  0
+ cut.stage[2]    <-  cc
+ cut.stage[3]    <-  1
+ cc              <-  5.535e-01
+
+######### albumin
+ gamma.albumin.0    <-  -8.857e-01
+ gamma.albumin.age  <-   1.908e-02
+ gamma.albumin.sex  <-   1.528e-02
+ gamma.albumin.wbc  <-   4.408e-01
+ gamma.albumin.stage<-   2.905e-01
+ gamma.albumin.hb   <-  -2.410e-02
+
+ }
