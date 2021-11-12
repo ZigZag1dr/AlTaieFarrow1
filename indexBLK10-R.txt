@@ -1,0 +1,29 @@
+indexBLK10<-function(data,V0,mu0,musex,muage,cuts.stage,cuts.ecog) 
+{indexvalues<-numeric(1391)
+ normlistcen<-c(1,2)
+ normlistobs<-c(1,2,5)
+ index<-1:9
+ nonnormcen<-index[-normlistcen]
+ nonnormobs<-index[-normlistobs]
+ V0cen<-V0[nonnormcen,nonnormcen]
+ V0obs<-V0[nonnormobs,nonnormobs]
+ P0cen<-solve(V0cen)
+ P0obs<-solve(V0obs)
+ for (i in 1:1391)
+     {patdata<-list(age=data$age[i],sex=data$sex[i],hb=data$hb[i],
+                    wbc=data$logwbc[i],stage=data$stage[i],
+                    albumin=data$albumin[i],ldh=data$ldh[i],
+                    ldh.cen=data$ldh.cen[i],ecog=data$ecog[i],
+                    ap=data$ap[i],urea=data$urea[i])
+      if (is.na(data$ldh[i])==TRUE)
+         {indexvalues[i]<-BLKindex10(patdata,V0,P0cen,normlistcen,
+                                 mu0,musex,muage,cuts.stage,cuts.ecog)
+          }
+      else
+         {indexvalues[i]<-BLKindex10(patdata,V0,P0obs,normlistobs,
+                                 mu0,musex,muage,cuts.stage,cuts.ecog)
+          }
+      
+      }
+ return(indexvalues)
+ }
