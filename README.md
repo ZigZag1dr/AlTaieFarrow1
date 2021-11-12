@@ -58,3 +58,7 @@ BLKindex10-R.txt
 DirectIndexBUG.txt
 
       JAGS model specification for the "full-Bayes" comparison: six-covariate example
+      
+DirectIndex10BUG.txt
+
+      JAGS model specification for the "full-Bayes" comparison: ten-covariate example
