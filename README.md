@@ -54,3 +54,7 @@ indexBLK10-R.txt
 BLKindex10-R.txt
 
       R function to compute the prognostic index value for an individual patient (10-covariate example)
+
+DirectIndexBUG.txt
+
+      JAGS model specification for the "full-Bayes" comparison: six-covariate example
