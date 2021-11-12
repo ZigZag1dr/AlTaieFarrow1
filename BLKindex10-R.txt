@@ -1,0 +1,117 @@
+BLKindex10<-function(patdata,V0,P0,normlist,mu0,musex,muage,cuts.stage,cuts.ecog)    
+{if (is.na(patdata$ldh)==TRUE)
+    {shift<-1}
+ else
+    {shift<-0}
+ E0<-mu0+muage*patdata$age+musex*patdata$sex 
+ E0z<-E0[-normlist]
+ V0z<-V0[-normlist,-normlist]
+ n<-9-length(normlist)
+ J<-n
+ E1<-matrix(nrow=n,ncol=J)
+ P1<-numeric(n*n*J)
+ dim(P1)<-c(n,n,J)
+
+####################### normal covariates (hb, wbc and ldh (if ldh observed)) 
+ 
+ paty<-c(patdata$hb,patdata$wbc,patdata$stage,patdata$albumin,patdata$ldh,
+                                      patdata$ecog,patdata$ap,patdata$urea)                                                                
+ adjust1<-adjbynormnew(paty,E0,V0,normlist)
+     P1[,,1]<-adjust1$P
+     E1[,1]<-adjust1$E
+     
+
+
+###################### covariate (stage)
+                                                              
+ if (is.na(patdata$stage)==TRUE)
+    {P1[,,2]<-P0
+     E1[,2]<-E0z
+     }
+ else
+    {adjust2<-adjbynoncon(patdata$stage,E0z,V0z,1,cuts.stage)
+     P1[,,2]<-adjust2$P
+     E1[,2]<-adjust2$E
+     }
+
+
+###################### covariate (albumin)
+                                                            
+ if (is.na(patdata$albumin)==TRUE)
+    {P1[,,3]<-P0
+     E1[,3]<-E0z
+     }
+ else
+    {adjust3<-adjbynoncon(patdata$albumin,E0z,V0z,2,0)
+     P1[,,3]<-adjust3$P
+     E1[,3]<-adjust3$E
+     }
+
+##################### covariate (ldh)
+
+ if (is.na(patdata$ldh)==TRUE)
+    {if (is.na(patdata$ldh.cen)==TRUE)
+        {P1[,,4]<-P0
+         E1[,4]<-E0z
+         }
+     else
+        {adjust4<-adjbynoncon(patdata$ldh.cen,E0z,V0z,3,c(0,1))
+         P1[,,4]<-adjust4$P
+         E1[,4]<-adjust4$E 
+         }
+      }  
+
+##################### covariate (ecog)
+
+ v3<-3+shift
+ if (is.na(patdata$ecog)==TRUE)
+        {P1[,,v3]<-P0
+         E1[,v3]<-E0z
+         }
+     else
+        {adjust5<-adjbynoncon(patdata$ecog,E0z,V0z,v3,cuts.ecog)
+         P1[,,v3]<-adjust5$P
+         E1[,v3]<-adjust5$E 
+         }  
+
+#################### covariate (ap) 
+
+ v4<-4+shift
+ if (is.na(patdata$ap)==TRUE)
+        {P1[,,v4]<-P0
+         E1[,v4]<-E0z
+         }
+     else
+        {adjust6<-adjbynoncon(patdata$ap,E0z,V0z,v4,0)
+         P1[,,v4]<-adjust6$P
+         E1[,v4]<-adjust6$E 
+         }  
+
+##################### covariate (urea)
+
+
+ v5<-5+shift
+ if (is.na(patdata$urea)==TRUE)
+        {P1[,,v5]<-P0
+         E1[,v5]<-E0z
+         }
+     else
+        {adjust7<-adjbynoncon(patdata$urea,E0z,V0z,v5,0)
+         P1[,,v5]<-adjust7$P
+         E1[,v5]<-adjust7$E 
+         }  
+
+################# 
+
+ v6<-6+shift
+ PP<-matrix(0,nrow=v6,ncol=v6)
+ PPEE<-rep(0,v6)
+ for (j in 1:v5)
+     {PP<-PP+P1[,,j]
+      PPEE<-PPEE+P1[,,j]%*%E1[,j]
+      }
+ PP<-PP-(v5-1)*P0
+ PPEE<-PPEE-(v5-1)*P0%*%E0z
+ EE<-solve(PP,PPEE)
+ return(EE[v6])
+ }
